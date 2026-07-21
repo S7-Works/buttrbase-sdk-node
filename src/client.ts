@@ -90,7 +90,7 @@ export interface ButtrbaseClientOptions {
    * This is the single app-server credential.
    */
   clientId: string;
-  clientSecret: string;
+  clientSecret?: string;
   /**
    * Optional pre-obtained bearer access token. When supplied it is used as the
    * `Authorization: Bearer` value immediately. Token-issuing flows
@@ -151,9 +151,9 @@ export class ButtrbaseClient {
 
   constructor(opts: ButtrbaseClientOptions) {
     if (!opts.clientId) throw new Error('clientId is required');
-    if (!opts.clientSecret) throw new Error('clientSecret is required');
+    
     this.clientId = opts.clientId;
-    this.clientSecret = opts.clientSecret;
+    this.clientSecret = opts.clientSecret ?? '';
     this.accessToken = opts.accessToken;
     this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
     const f = opts.fetch ?? globalThis.fetch;
@@ -286,7 +286,7 @@ export class ButtrbaseClient {
   private async request<T>(
     method: string,
     path: string,
-    opts: { body?: unknown; auth?: boolean; query?: Record<string, unknown>; signal?: AbortSignal } = {},
+    opts: { body?: unknown; auth?: boolean; query?: Record<string, unknown>; signal?: AbortSignal; headers?: Record<string, string> } = {},
   ): Promise<T> {
     const auth = opts.auth ?? true;
     let url = `${this.baseUrl}${path}`;
@@ -2108,6 +2108,9 @@ export class ButtrbaseClient {
     return this.request<void>('POST', '/api/v1/auth/otp/send', {
       body: { email, app_uuid: appUuid },
       auth: false,
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(this.clientId + ':' + this.clientSecret).toString('base64'),
+      }
     });
   }
 
@@ -2525,6 +2528,9 @@ export class ButtrbaseClient {
     return this.request<void>('POST', '/api/v1/auth/otp/send', {
       body: { email, app_uuid: appUuid },
       auth: false,
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(this.clientId + ':' + this.clientSecret).toString('base64'),
+      }
     });
   }
 

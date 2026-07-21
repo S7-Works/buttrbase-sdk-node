@@ -30,10 +30,8 @@ export class ButtrbaseClient {
     constructor(opts) {
         if (!opts.clientId)
             throw new Error('clientId is required');
-        if (!opts.clientSecret)
-            throw new Error('clientSecret is required');
         this.clientId = opts.clientId;
-        this.clientSecret = opts.clientSecret;
+        this.clientSecret = opts.clientSecret ?? '';
         this.accessToken = opts.accessToken;
         this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
         const f = opts.fetch ?? globalThis.fetch;
@@ -1310,6 +1308,9 @@ export class ButtrbaseClient {
         return this.request('POST', '/api/v1/auth/otp/send', {
             body: { email, app_uuid: appUuid },
             auth: false,
+            headers: {
+                'Authorization': 'Basic ' + Buffer.from(this.clientId + ':' + this.clientSecret).toString('base64'),
+            }
         });
     }
     /**
@@ -1612,6 +1613,9 @@ export class ButtrbaseClient {
         return this.request('POST', '/api/v1/auth/otp/send', {
             body: { email, app_uuid: appUuid },
             auth: false,
+            headers: {
+                'Authorization': 'Basic ' + Buffer.from(this.clientId + ':' + this.clientSecret).toString('base64'),
+            }
         });
     }
     /**

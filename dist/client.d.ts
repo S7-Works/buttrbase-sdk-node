@@ -6,7 +6,7 @@ export interface ButtrbaseClientOptions {
      * This is the single app-server credential.
      */
     clientId: string;
-    clientSecret: string;
+    clientSecret?: string;
     /**
      * Optional pre-obtained bearer access token. When supplied it is used as the
      * `Authorization: Bearer` value immediately. Token-issuing flows
