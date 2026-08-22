@@ -2,3 +2,8 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+target/
+.DS_Store
+*.dylib
+*.so
+.env
