@@ -89,7 +89,7 @@ export interface ButtrbaseClientOptions {
    * `client_secret` pair returned by {@link ButtrbaseClient.createCredential}).
    * This is the single app-server credential.
    */
-  clientId: string;
+  clientId?: string;
   clientSecret?: string;
   /**
    * Optional pre-obtained bearer access token. When supplied it is used as the
@@ -150,9 +150,7 @@ export class ButtrbaseClient {
   private retryBaseDelayMs: number;
 
   constructor(opts: ButtrbaseClientOptions) {
-    if (!opts.clientId) throw new Error('clientId is required');
-    
-    this.clientId = opts.clientId;
+    this.clientId = opts.clientId || 'bb_live_public';
     this.clientSecret = opts.clientSecret ?? '';
     this.accessToken = opts.accessToken;
     this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
@@ -167,8 +165,11 @@ export class ButtrbaseClient {
    * Instantiate a secret-less client for public/frontend contexts.
    * Authentication operations that require a `clientSecret` will fail.
    */
-  static newPublic(clientId: string, opts: Omit<ButtrbaseClientOptions, 'clientId' | 'clientSecret'> = {}): ButtrbaseClient {
-    return new ButtrbaseClient({ clientId, ...opts });
+  static newPublic(clientId?: string | Omit<ButtrbaseClientOptions, 'clientId' | 'clientSecret'>, opts?: Omit<ButtrbaseClientOptions, 'clientId' | 'clientSecret'>): ButtrbaseClient {
+    if (typeof clientId === 'object') {
+      return new ButtrbaseClient({ clientId: 'bb_live_public', ...clientId });
+    }
+    return new ButtrbaseClient({ clientId: clientId || 'bb_live_public', ...opts });
   }
 
   // ===== Client-credentials token grant =====

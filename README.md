@@ -178,6 +178,9 @@ default.
 `Verifier` mirrors `Verifier` / `VerifierConfig` / `verify` / `verify_bearer`
 from the Rust SDK (`src/verify/verifier.rs`).
 
+> **Note:** `Verifier` now supports hybrid verification! By default, it performs local RS256 verification using the JWKS endpoint. However, if the token is an `HS256` token, it will automatically fallback to a network introspection request against the Buttrbase API to verify the token. You MUST set the `INTROSPECTION_API_KEY` environment variable to authenticate the introspection request.
+
+
 #### Option B — decode-only helpers (no signature check)
 
 Use these helpers when you have already verified the token signature with

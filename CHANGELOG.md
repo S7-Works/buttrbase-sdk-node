@@ -8,7 +8,12 @@ All methods below mirror the identically-named method in the Rust SDK (`buttrbas
 Every new method has a unit test asserting the correct URL, HTTP verb, request body, and
 parsed response shape.
 
+#### Verifier — Hybrid Verification
+
+- **`verifyToken` / `verifyBearer`** now support a hybrid verification fallback. If an `HS256` token is encountered, the SDK decodes the header and makes a network introspection call to `/api/auth/introspect`. Set the `INTROSPECTION_API_KEY` environment variable to authenticate the introspection request. RS256 tokens proceed with existing local verification.
+
 #### Auth — email OTP (v1, uuid-based)
+
 
 - **`sendOtpV1(email, appUuid)`** — `POST /api/v1/auth/otp/send` (no auth).
   Canonical form of the v1 email-OTP send endpoint, mirroring Rust `send_otp(email, app_uuid)`.

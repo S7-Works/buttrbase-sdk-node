@@ -16,7 +16,7 @@
  * (Rust SDK 0.6.0).
  */
 
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { createRemoteJWKSet, jwtVerify, decodeProtectedHeader } from 'jose';
 import type { Claims, AuthContext } from './types.js';
 
 /**
@@ -176,6 +176,42 @@ export class Verifier {
    * Returns the typed {@link Claims} on success; throws on any failure.
    */
   async verifyToken(token: string): Promise<Claims> {
+    const header = decodeProtectedHeader(token);
+
+    if (header.alg === 'HS256') {
+      const introspectionKey = process.env.INTROSPECTION_API_KEY || '';
+      const f = globalThis.fetch;
+      if (!f) {
+        throw new Error('No fetch implementation available');
+      }
+
+      const res = await f(`${this.config.issuer}/api/auth/introspect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Introspection-Key': introspectionKey,
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Introspection request failed: ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data.active === true) {
+        return {
+          sub: data.data?.user_uuid || '',
+          org: data.data?.org_uuid || '',
+          exp: data.exp,
+          iat: 0,
+          data: data.data,
+        } as Claims;
+      } else {
+        throw new Error('Token is inactive');
+      }
+    }
+
     const verifyOptions: Parameters<typeof jwtVerify>[2] = {
       algorithms: ['RS256'],
       issuer: this.config.issuer,
